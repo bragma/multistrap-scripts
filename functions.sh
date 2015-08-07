@@ -97,7 +97,7 @@ function cleanupfolder {
 }
 
 function createimg {
-	dd if=/dev/zero of="$1" bs=1 count=0 seek=2048M
+	dd if=/dev/zero of="$1" bs=4096 count=0 seek="$2"
 	mkfs.ext4 -b 4096 -L linuxroot -F "$1"
 }
 

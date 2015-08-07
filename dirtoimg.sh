@@ -17,7 +17,13 @@ IMGNAME=$(getparamorfail "$2" "destination rootfs image")
 
 checkrootuser
 
-createimg "$IMGNAME"
+# Get dir size in blocks of 4096 bytes
+DIRBLOCKS=$(du -s -B 4096 "$DIRNAME" | awk '{print $1}')
+
+# Increase output image of 40%
+IMGBLOCKS=$(( $DIRBLOCKS * 140 / 100 ))
+
+createimg "$IMGNAME" "$IMGBLOCKS"
 MNTPOINT=$(mountimg "$IMGNAME")
 copyfs "$DIRNAME" "$MNTPOINT"
 umountimg "$MNTPOINT"
