@@ -19,10 +19,7 @@ if [ ! -f $MULTICFG ]; then
 	exit 3
 fi
 
-multistrap -f "$MULTICFG"
-
 checkrootuser
-
 
 function up {
 	setconfenv
@@ -42,8 +39,7 @@ function configure {
 	chroot "$1" dpkg --configure -a
 }
 
-set -x
-
+multistrap -f "$MULTICFG"
 up "$ROOTFSDIR"
 configure "$ROOTFSDIR"
 down "$ROOTFSDIR"
