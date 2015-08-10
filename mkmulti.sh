@@ -1,6 +1,8 @@
 #!/bin/bash
+# Create a rootfs folder and intstall packages
 # 
-# $1 dist name
+# $1 configuration file
+# $2 destination rootfs folder
 
 set -e
 
@@ -10,16 +12,8 @@ set -e
 # get scripts path
 PATH=$PATH:$(dirname $(realpath $0))
 
-DIST=$(getparamorfail "$1" "distribution name")
-MULTICFG="${DIST}.multi.cfg"
-ROOTFSDIR="$DIST"
-
-if [ ! -f $MULTICFG ]; then
-	echo "Error: can't find multistrap configuration file $MULTICFG"
-	exit 3
-fi
-
-checkrootuser
+MULTICFG=$(getfileorfail "$1" "configuration file")
+ROOTFSDIR=$(getparamorfail "$2" "destination rootfs folder")
 
 function up {
 	setconfenv
@@ -39,8 +33,16 @@ function configure {
 	chroot "$1" dpkg --configure -a
 }
 
-multistrap -f "$MULTICFG"
+checkrootuser
+
+if [ -d "$ROOTFSDIR" ]; then
+	echo "Error: rootfs folder already exists"
+	exit 4
+fi
+
+multistrap --file "$MULTICFG" --dir "$ROOTFSDIR"
 up "$ROOTFSDIR"
 configure "$ROOTFSDIR"
 down "$ROOTFSDIR"
+echo "RootFS created in $ROOTFSDIR"
 

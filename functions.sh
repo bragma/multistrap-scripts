@@ -1,19 +1,19 @@
 #!/bin/bash
 
-function getparamorfail {
+function checkset {
 	if [ -z "$1" ] ; then
 		echo "Error: $2 has not been specified." >&2
 		exit 1
 	fi
+}
 
+function getparamorfail {
+	checkset "$1" "$2"
 	echo "$1"
 }
 
 function getdirorfail {
-	if [ -z "$1" ] ; then
-		echo "Error: $2 has not been specified." >&2
-		exit 1
-	fi
+	checkset "$1" "$2"
 
 	if [ ! -d "$1" ] ; then
 		echo "Error: $2 does not exist or is not a folder." >&2
@@ -24,10 +24,7 @@ function getdirorfail {
 }
 
 function getfileorfail {
-	if [ -z "$1" ] ; then
-		echo "Error: $2 has not been specified." >&2
-		exit 1
-	fi
+	checkset "$1" "$2"
 
 	if [ ! -f "$1" ] ; then
 		echo "Error: $2 does not exist or is not a file." >&2
@@ -49,9 +46,10 @@ function mounttmpfs {
 }
 
 function umounttmpfs {
-	umount "$1/dev/"
-	umount "$1/sys/"
-	umount "$1/proc/"
+	mountpoint -q "$1/dev/" && umount "$1/dev/"
+	mountpoint -q "$1/sys/" && umount "$1/sys/"
+	mountpoint -q "$1/proc/" && umount "$1/proc/"
+	true
 }
 
 function addemu {
@@ -97,6 +95,7 @@ function cleanupfolder {
 }
 
 function createimg {
+	rm -f "$1"
 	dd if=/dev/zero of="$1" bs=4096 count=0 seek="$2"
 	mkfs.ext4 -b 4096 -L linuxroot -F "$1"
 }
